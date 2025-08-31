@@ -237,62 +237,39 @@ function resetBoard(startAs = "X") {
   nextRoundBtn.disabled = true;
 }
 
-/* ================= AI (minimax) ================= */
+* ================= AI (minimax) ================= */
 function chooseAIMove(board, ai, difficulty) {
   const empties = board
     .map((v, i) => (v === "" ? i : null))
     .filter((i) => i !== null);
   if (empties.length === 0) return null;
-  if (difficulty === "easy")
+
+  if (difficulty === "easy") {
+    // Always random
     return empties[Math.floor(Math.random() * empties.length)];
-  if (difficulty === "medium") {
-    return Math.random() < 0.5
-      ? empties[Math.floor(Math.random() * empties.length)]
-      : minimax(board.slice(), ai).index;
   }
+  if (difficulty === "medium") {
+    // Win if possible
+    for (const idx of empties) {
+      const testBoard = board.slice();
+      testBoard[idx] = ai;
+      if (checkWinnerStatic(testBoard, ai)) return idx;
+    }
+    // Block opponent's win if possible
+    const human = ai === "X" ? "O" : "X";
+    for (const idx of empties) {
+      const testBoard = board.slice();
+      testBoard[idx] = human;
+      if (checkWinnerStatic(testBoard, human)) return idx;
+    }
+    // Otherwise random
+    return empties[Math.floor(Math.random() * empties.length)];
+  }
+  // Hard: always use minimax
   return minimax(board.slice(), ai).index;
 }
 
-function minimax(b, player) {
-  const spots = b
-    .map((v, i) => (v === "" ? i : null))
-    .filter((i) => i !== null);
-  if (checkWinnerStatic(b, "X")) return { score: player === "X" ? -10 : 10 };
-  if (checkWinnerStatic(b, "O")) return { score: player === "O" ? -10 : 10 };
-  if (spots.length === 0) return { score: 0 };
-
-  const moves = [];
-  for (const i of spots) {
-    const move = { index: i };
-    b[i] = player;
-    move.score = minimax(b, player === "X" ? "O" : "X").score;
-    b[i] = "";
-    moves.push(move);
-  }
-  const aiSym = state.p1Symbol === "X" ? "O" : "X";
-  if (player === aiSym) {
-    let best = -Infinity,
-      bestIdx = 0;
-    moves.forEach((m, i) => {
-      if (m.score > best) {
-        best = m.score;
-        bestIdx = i;
-      }
-    });
-    return moves[bestIdx];
-  } else {
-    let best = Infinity,
-      bestIdx = 0;
-    moves.forEach((m, i) => {
-      if (m.score < best) {
-        best = m.score;
-        bestIdx = i;
-      }
-    });
-    return moves[bestIdx];
-  }
-}
-
+  
 /* ================= core flow ================= */
 function playerToMoveIsComputer() {
   if (state.opponent !== "computer") return false;
