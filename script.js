@@ -1,14 +1,11 @@
-/* ================= AUDIO================= */
-const AudioManager = (function () {
+// ================= AUDIO =================
+const AudioManager = (() => {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  let musicNode = null,
-    musicGain = null;
-  let sfxOn = true,
-    musicOn = false;
+  let musicNode = null, musicGain = null;
+  let sfxOn = true, musicOn = false;
   function beep(freq = 440, dur = 0.12, type = "sine", gain = 0.12) {
     if (!sfxOn) return;
-    const o = ctx.createOscillator(),
-      g = ctx.createGain();
+    const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type;
     o.frequency.value = freq;
     g.gain.value = gain;
@@ -24,10 +21,7 @@ const AudioManager = (function () {
   }
   function playWin() {
     if (!sfxOn) return;
-    const freqs = [880, 1000, 1180];
-    freqs.forEach((f, i) => {
-      setTimeout(() => beep(f, 0.12, "sine", 0.12), i * 90);
-    });
+    [880, 1000, 1180].forEach((f, i) => setTimeout(() => beep(f, 0.12, "sine", 0.12), i * 90));
   }
   function playDraw() {
     if (!sfxOn) return;
@@ -35,6 +29,244 @@ const AudioManager = (function () {
     setTimeout(() => beep(360, 0.18, "sine", 0.08), 180);
   }
   function startMusic() {
+    if (musicOn) return;
+    try { if (ctx.state === "suspended") ctx.resume(); } catch (e) {}
+    musicOn = true;
+    musicNode = ctx.createOscillator();
+    musicNode.type = "sine";
+    musicGain = ctx.createGain();
+    musicGain.gain.value = 0.02;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.05;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 0.02;
+    lfo.connect(lfoGain);
+    lfoGain.connect(musicNode.frequency);
+    musicNode.frequency.value = 120;
+    musicNode.connect(musicGain);
+    musicGain.connect(ctx.destination);
+    lfo.start();
+    musicNode.start();
+    musicNode._lfo = lfo;
+  }
+  function stopMusic() {
+    if (!musicOn) return;
+    musicOn = false;
+    if (musicNode) {
+      try { musicNode._lfo.stop(); } catch (e) {}
+      try { musicNode.stop(); } catch (e) {}
+      musicNode.disconnect();
+      musicNode = null;
+      musicGain.disconnect();
+      musicGain = null;
+    }
+  }
+  function toggleSfx() { sfxOn = !sfxOn; return sfxOn; }
+  function toggleMusic() { musicOn ? stopMusic() : startMusic(); return musicOn; }
+  function muteAll(toggle) {
+    if (toggle === undefined) toggle = !sfxOn || musicOn;
+    if (toggle) { sfxOn = false; stopMusic(); musicOn = false; }
+    else { sfxOn = true; }
+  }
+  return {
+    playMove,
+    playWin,
+    playDraw,
+    toggleSfx,
+    toggleMusic,
+    muteAll,
+    _state: () => ({ sfxOn, musicOn }),
+  };
+})();
+
+// ================= DOM elements =================
+// (Assume all your DOM element selectors remain unchanged here)
+
+// Example (replace/add your full DOM selectors as needed):
+const boardEl = document.getElementById("board");
+const resultEl = document.getElementById("result");
+const startBtn = document.getElementById("startBtn");
+const difficultySel = document.getElementById("difficulty");
+const symbolSel = document.getElementById("symbol");
+
+// ================= game state =================
+let state = {
+  mode: "endless", // "quick" or "endless"
+  opponent: "computer", // "computer" or "human"
+  difficulty: "hard",
+  p1Name: "Player 1",
+  p2Name: "Computer",
+  p1Symbol: "X",
+  current: "X",
+  active: true,
+  board: Array(9).fill(""),
+  scores: { X: 0, O: 0, D: 0, round: 1 },
+  bestOf: 3,
+  neededWins: 2,
+};
+
+// ================= helpers =================
+const wins = [
+  [0, 1, 2],[3, 4, 5],[6, 7, 8],
+  [0, 3, 6],[1, 4, 7],[2, 5, 8],
+  [0, 4, 8],[2, 4, 6],
+];
+
+function checkWinnerStatic(board, sym) {
+  return wins.some(line => line.every(i => board[i] === sym));
+}
+
+function boardFull(board) {
+  return board.every(cell => cell !== "");
+}
+
+// ================= board rendering =================
+function renderBoard() {
+  boardEl.innerHTML = "";
+  state.board.forEach((val, i) => {
+    const cell = document.createElement("div");
+    cell.className = "cell" + (val ? " " + val : "");
+    cell.dataset.index = i;
+    cell.textContent = val;
+    cell.addEventListener("click", onCellClick);
+    boardEl.appendChild(cell);
+  });
+}
+
+function resetBoard(startSym = "X") {
+  state.board = Array(9).fill("");
+  state.active = true;
+  state.current = startSym;
+  resultEl.textContent = "";
+  renderBoard();
+}
+
+// ================= AI (minimax) =================
+function chooseAIMove(board, ai, difficulty) {
+  const empties = board.map((v, i) => v === "" ? i : null).filter(i => i !== null);
+  if (empties.length === 0) return null;
+
+  if (difficulty === "easy") {
+    return empties[Math.floor(Math.random() * empties.length)];
+  }
+
+  if (difficulty === "medium") {
+    // Win if possible
+    for (const idx of empties) {
+      const testBoard = board.slice();
+      testBoard[idx] = ai;
+      if (checkWinnerStatic(testBoard, ai)) return idx;
+    }
+    // Block opponent's win
+    const human = ai === "X" ? "O" : "X";
+    for (const idx of empties) {
+      const testBoard = board.slice();
+      testBoard[idx] = human;
+      if (checkWinnerStatic(testBoard, human)) return idx;
+    }
+    // Random otherwise
+    return empties[Math.floor(Math.random() * empties.length)];
+  }
+
+  // Hard: use minimax
+  return minimax(board.slice(), ai, ai).index;
+}
+
+function minimax(board, player, aiPlayer) {
+  const availSpots = board.map((v, i) => v === "" ? i : null).filter(i => i !== null);
+
+  // Terminal states
+  if (checkWinnerStatic(board, aiPlayer)) return { score: 10 };
+  if (checkWinnerStatic(board, aiPlayer === "X" ? "O" : "X")) return { score: -10 };
+  if (availSpots.length === 0) return { score: 0 };
+
+  const moves = [];
+  for (const i of availSpots) {
+    board[i] = player;
+    let score;
+    if (player === aiPlayer) {
+      score = minimax(board, aiPlayer === "X" ? "O" : "X", aiPlayer).score;
+    } else {
+      score = minimax(board, aiPlayer, aiPlayer).score;
+    }
+    moves.push({ index: i, score });
+    board[i] = "";
+  }
+
+  if (player === aiPlayer) {
+    // Maximize
+    let max = -Infinity, maxMove = null;
+    for (const move of moves) {
+      if (move.score > max) { max = move.score; maxMove = move; }
+    }
+    return maxMove;
+  } else {
+    // Minimize
+    let min = Infinity, minMove = null;
+    for (const move of moves) {
+      if (move.score < min) { min = move.score; minMove = move; }
+    }
+    return minMove;
+  }
+}
+
+// ================= core flow =================
+function nextTurn() {
+  if (!state.active) return;
+  if (boardFull(state.board)) {
+    state.active = false;
+    resultEl.textContent = "Draw!";
+    AudioManager.playDraw();
+    state.scores.D++;
+    return;
+  }
+  if (checkWinnerStatic(state.board, state.current)) {
+    state.active = false;
+    resultEl.textContent = state.current + " Wins!";
+    AudioManager.playWin();
+    state.scores[state.current]++;
+    return;
+  }
+  state.current = state.current === "X" ? "O" : "X";
+  if (state.opponent === "computer" && state.current === state.p2Symbol && state.active) {
+    setTimeout(aiMove, 400);
+  }
+}
+
+function aiMove() {
+  const idx = chooseAIMove(state.board, state.p2Symbol, state.difficulty);
+  if (idx === null || state.board[idx] !== "") return;
+  state.board[idx] = state.p2Symbol;
+  AudioManager.playMove(state.p2Symbol);
+  renderBoard();
+  nextTurn();
+}
+
+// ================= UI events =================
+function onCellClick(e) {
+  const idx = +e.currentTarget.dataset.index;
+  if (!state.active || state.board[idx]) return;
+  state.board[idx] = state.current;
+  AudioManager.playMove(state.current);
+  renderBoard();
+  nextTurn();
+}
+
+startBtn.addEventListener("click", () => {
+  state.difficulty = difficultySel.value;
+  state.p1Symbol = symbolSel.value;
+  state.p2Symbol = state.p1Symbol === "X" ? "O" : "X";
+  resetBoard(state.p1Symbol);
+  renderBoard();
+  if (state.opponent === "computer" && state.p2Symbol === "X") {
+    setTimeout(aiMove, 400);
+  }
+});
+
+// ================= scoreboard update =================
+// (Add your scoreboard update logic here if needed)
+
+renderBoard();  function startMusic() {
     if (musicOn) return;
     try {
       if (ctx.state === "suspended") ctx.resume();
