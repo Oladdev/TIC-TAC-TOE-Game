@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic Tac Toe — Ola d dev</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0b0b0f" />
+    <link rel="stylesheet" href="styles.css" />
+    <script
+      src="https://kit.fontawesome.com/8c87b7234d.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="glow-bg"><h1>Ola d dev</h1></div>
+    <div class="app">
+      <!-- ================= MENU ================= -->
+      <section class="menu" id="menu">
+        <div class="menu-left">
+          <h1 class="brand">Tic Tac Toe</h1>
+          <p class="subtitle">
+            Quick Match or Endless Play — pick your rival and game on
+          </p>
+
+          <div class="mode-row" style="margin-bottom: 12px">
+            <span class="chip">Game Mode</span>
+            <label class="hint"
+              >Choose either <strong>Quick Match</strong> (single game) or
+              <strong>Endless</strong> (keeps score).</label
+            >
+          </div>
+          <div class="options" style="margin-bottom: 6px">
+            <div class="field">
+              <label for="gameMode">Mode</label>
+              <select id="gameMode">
+                <option value="quick">Quick Match</option>
+                <option value="endless" selected>Endless Play</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="opponent">Opponent</label>
+              <select id="opponent">
+                <option value="computer" selected>Computer</option>
+                <option value="human">Friend (2 Players)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="options">
+            <div class="field">
+              <label for="p1">Player 1 Name</label>
+              <input id="p1" placeholder="Player 1" />
+            </div>
+            <div class="field" id="p2-field" style="display: none">
+              <label for="p2">Player 2 Name</label>
+              <input id="p2" placeholder="Player 2" />
+            </div>
+          </div>
+
+          <div class="options" style="margin-top: 6px">
+            <div class="field">
+              <label for="symbol">Play as</label>
+              <select id="symbol">
+                <option value="X" selected>X</option>
+                <option value="O">O</option>
+              </select>
+            </div>
+            <div class="field" id="difficulty-field">
+              <label for="difficulty">Difficulty (vs Computer)</label>
+              <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard" selected>Hard</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Added controls (best-of & sound) but styled to match Draft1 -->
+          <div class="options" style="margin-top: 8px; align-items: center">
+            <div class="field">
+              <label for="bestOf">Best of (Endless)</label>
+              <select id="bestOf" class="small-select">
+                <option value="0">No (never auto-end)</option>
+                <option value="3" selected>Best of 3</option>
+                <option value="5">Best of 5</option>
+                <option value="7">Best of 7</option>
+              </select>
+            </div>
+            <div
+              class="field"
+              style="display: flex; gap: 8px; align-items: center"
+            >
+              <label style="margin-bottom: 6px">Sound & Music</label>
+              <div class="small-row">
+                <button id="sfxToggle" class="btn btn-ghost">SFX: On</button>
+                <button id="musicToggle" class="btn btn-ghost">
+                  Music:Off
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="big-actions">
+            <button class="btn btn-primary" id="startBtn">Start Game</button>
+            <button class="btn btn-ghost" id="demoBtn">Random Names</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="score" style="height: 100%">
+            <h3>HOW IT WORKS</h3>
+            <div class="line">
+              <span>Quick Match <i class="fa-solid fa-gamepad"></i></span
+              ><span class="badge">One & done</span>
+            </div>
+            <div class="line">
+              <span>Endless Play <i class="fa-solid fa-infinity"></i></span
+              ><span class="badge">Keeps score</span>
+            </div>
+            <div class="line">
+              <span>Vs Computer <i class="fa-solid fa-robot"></i></span
+              ><span class="badge">Play against an AI</span>
+            </div>
+            <div class="line">
+              <span>Vs Friend <i class="fa-solid fa-user"></i></span
+              ><span class="badge">Local 2 Player</span>
+            </div>
+            <p class="meta">
+              Tip: If you play as <strong>O</strong> vs Computer, the AI starts
+              as X.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= GAME ================= -->
+      <section class="game" id="game">
+        <div class="board-wrap">
+          <div class="hud">
+            <div class="turn" id="turn"></div>
+            <div style="display: flex; gap: 8px">
+              <button class="btn btn-ghost" id="backBtn">
+                Change Settings
+              </button>
+              <button
+                class="btn btn-ghost"
+                id="nextRoundBtn"
+                title="Start next round"
+                style="display: none"
+              >
+                Next Round
+              </button>
+              <button
+                class="btn btn-ghost"
+                id="resetMatchBtn"
+                title="Reset match"
+                style="display: none"
+              >
+                Reset Match
+              </button>
+            </div>
+          </div>
+          <div class="board" id="board"></div>
+          <div class="result" id="result"></div>
+        </div>
+
+        <aside class="score" id="scorePanel">
+          <h3>Scoreboard</h3>
+          <div class="line">
+            <span id="xName">X</span><span class="badge x" id="xScore">0</span>
+          </div>
+          <div class="line">
+            <span id="oName">O</span><span class="badge o" id="oScore">0</span>
+          </div>
+          <div class="line">
+            <span>Draws</span><span class="badge" id="dScore">0</span>
+          </div>
+          <div class="meta"><span id="roundMeta">Round: 1</span></div>
+
+          <div class="controls">
+            <button
+              id="endMatchBtn"
+              class="btn btn-primary"
+              style="display: none"
+            >
+              End Match
+            </button>
+            <button id="muteAllBtn" class="btn btn-ghost">Mute</button>
+          </div>
+        </aside>
+      </section>
+
+      <!-- Quick Match Finished Modal -->
+      <div class="overlay" id="overlay">
+        <div class="modal">
+          <h2 id="modalTitle">Match Over</h2>
+          <p id="modalSub">Nice one! Want to go again?</p>
+          <div style="display: flex; gap: 8px; justify-content: center">
+            <button class="btn btn-primary" id="playAgainBtn">
+              Play Again
+            </button>
+            <button class="btn btn-ghost" id="toMenuBtn">Back to Menu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .then(() => console.log("Service Worker Registered"))
+          .catch((err) =>
+            console.log("Service Worker registration failed:", err)
+          );
+      }
+    </script>
+  </body>
+</html>
