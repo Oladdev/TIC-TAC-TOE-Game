@@ -238,60 +238,72 @@ function resetBoard(startAs = "X") {
 }
 
 /* ================= AI (minimax) ================= */
+/* ================= AI (minimax) ================= */
 function chooseAIMove(board, ai, difficulty) {
-  const empties = board
-    .map((v, i) => (v === "" ? i : null))
-    .filter((i) => i !== null);
+  const empties = board.map((v, i) => (v === "" ? i : null)).filter(i => i !== null);
   if (empties.length === 0) return null;
-  if (difficulty === "easy")
+
+  if (difficulty === "easy") {
     return empties[Math.floor(Math.random() * empties.length)];
-  if (difficulty === "medium") {
-    return Math.random() < 0.5
-      ? empties[Math.floor(Math.random() * empties.length)]
-      : minimax(board.slice(), ai).index;
   }
+
+  if (difficulty === "medium") {
+    if (Math.random() < 0.5) {
+      return empties[Math.floor(Math.random() * empties.length)];
+    } else {
+      return minimax(board.slice(), ai).index;
+    }
+  }
+
+  // hard: always optimal
   return minimax(board.slice(), ai).index;
 }
 
-function minimax(b, player) {
-  const spots = b
-    .map((v, i) => (v === "" ? i : null))
-    .filter((i) => i !== null);
-  if (checkWinnerStatic(b, "X")) return { score: player === "X" ? -10 : 10 };
-  if (checkWinnerStatic(b, "O")) return { score: player === "O" ? -10 : 10 };
-  if (spots.length === 0) return { score: 0 };
+function minimax(newBoard, player) {
+  const availSpots = newBoard.map((v, idx) => (v === "" ? idx : null)).filter(v => v !== null);
+
+  if (checkWinnerStatic(newBoard, "X")) return { score: -10 };
+  if (checkWinnerStatic(newBoard, "O")) return { score: 10 };
+  if (availSpots.length === 0) return { score: 0 };
 
   const moves = [];
-  for (const i of spots) {
-    const move = { index: i };
-    b[i] = player;
-    move.score = minimax(b, player === "X" ? "O" : "X").score;
-    b[i] = "";
+
+  for (let i = 0; i < availSpots.length; i++) {
+    const move = { index: availSpots[i] };
+    newBoard[availSpots[i]] = player;
+
+    if (player === "O") {
+      move.score = minimax(newBoard, "X").score;
+    } else {
+      move.score = minimax(newBoard, "O").score;
+    }
+
+    newBoard[availSpots[i]] = "";
     moves.push(move);
   }
-  const aiSym = state.p1Symbol === "X" ? "O" : "X";
-  if (player === aiSym) {
-    let best = -Infinity,
-      bestIdx = 0;
-    moves.forEach((m, i) => {
-      if (m.score > best) {
-        best = m.score;
-        bestIdx = i;
+
+  let bestMove;
+  if (player === "O") {
+    let bestScore = -Infinity;
+    for (let i = 0; i < moves.length; i++) {
+      if (moves[i].score > bestScore) {
+        bestScore = moves[i].score;
+        bestMove = i;
       }
-    });
-    return moves[bestIdx];
+    }
   } else {
-    let best = Infinity,
-      bestIdx = 0;
-    moves.forEach((m, i) => {
-      if (m.score < best) {
-        best = m.score;
-        bestIdx = i;
+    let bestScore = Infinity;
+    for (let i = 0; i < moves.length; i++) {
+      if (moves[i].score < bestScore) {
+        bestScore = moves[i].score;
+        bestMove = i;
       }
-    });
-    return moves[bestIdx];
+    }
   }
+
+  return moves[bestMove];
 }
+
 
 /* ================= core flow ================= */
 function playerToMoveIsComputer() {
