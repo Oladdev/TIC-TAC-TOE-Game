@@ -238,10 +238,9 @@ function resetBoard(startAs = "X") {
 }
 
 /* ================= AI (minimax) ================= */
+/* ================= AI (minimax) ================= */
 function chooseAIMove(board, ai, difficulty) {
-  const empties = board
-    .map((v, i) => (v === "" ? i : null))
-    .filter((i) => i !== null);
+  const empties = board.map((v, i) => (v === "" ? i : null)).filter(i => i !== null);
   if (empties.length === 0) return null;
 
   if (difficulty === "easy") {
@@ -261,9 +260,13 @@ function chooseAIMove(board, ai, difficulty) {
 }
 
 function minimax(newBoard, player) {
+<<<<<<< HEAD
   const availSpots = newBoard
     .map((v, idx) => (v === "" ? idx : null))
     .filter((v) => v !== null);
+=======
+  const availSpots = newBoard.map((v, idx) => (v === "" ? idx : null)).filter(v => v !== null);
+>>>>>>> b25b4271bedfea8e93eb006d7b763216c794f084
 
   if (checkWinnerStatic(newBoard, "X")) return { score: -10 };
   if (checkWinnerStatic(newBoard, "O")) return { score: 10 };
@@ -306,6 +309,7 @@ function minimax(newBoard, player) {
 
   return moves[bestMove];
 }
+
 
 /* ================= core flow ================= */
 function playerToMoveIsComputer() {
