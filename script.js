@@ -43,7 +43,9 @@ const PersistenceManager = (() => {
   const loadStats = () => {
     try {
       const saved = localStorage.getItem(STATS_KEY);
-      return saved ? JSON.parse(saved) : { totalGames: 0, totalWins: 0, totalDraws: 0 };
+      return saved
+        ? JSON.parse(saved)
+        : { totalGames: 0, totalWins: 0, totalDraws: 0 };
     } catch (error) {
       console.warn("Failed to load stats:", error);
       return { totalGames: 0, totalWins: 0, totalDraws: 0 };
@@ -281,7 +283,8 @@ const AIEngine = (() => {
     if (memo[key] !== undefined) return memo[key];
 
     if (GameLogic.checkWinner(board, maxPlayer)) return { score: 10 };
-    if (GameLogic.checkWinner(board, maxPlayer === "X" ? "O" : "X")) return { score: -10 };
+    if (GameLogic.checkWinner(board, maxPlayer === "X" ? "O" : "X"))
+      return { score: -10 };
     if (GameLogic.isBoardFull(board)) return { score: 0 };
 
     const availableMoves = GameLogic.getAvailableMoves(board);
@@ -308,7 +311,8 @@ const AIEngine = (() => {
     if (memo[key] !== undefined) return memo[key];
 
     if (GameLogic.checkWinner(board, maxPlayer)) return { score: 10 };
-    if (GameLogic.checkWinner(board, maxPlayer === "X" ? "O" : "X")) return { score: -10 };
+    if (GameLogic.checkWinner(board, maxPlayer === "X" ? "O" : "X"))
+      return { score: -10 };
     if (GameLogic.isBoardFull(board)) return { score: 0 };
 
     const availableMoves = GameLogic.getAvailableMoves(board);
@@ -338,7 +342,9 @@ const AIEngine = (() => {
 
       switch (difficulty) {
         case "easy":
-          return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+          return availableMoves[
+            Math.floor(Math.random() * availableMoves.length)
+          ];
 
         case "medium":
           return Math.random() < 0.5
@@ -515,7 +521,10 @@ const StateManager = (() => {
   };
 
   const isComputerTurn = () => {
-    return state.opponent === "computer" && state.currentSymbol === getOpponentSymbol();
+    return (
+      state.opponent === "computer" &&
+      state.currentSymbol === getOpponentSymbol()
+    );
   };
 
   const recordMove = (index, symbol) => {
@@ -603,7 +612,7 @@ const GameController = (() => {
     const moveIndex = AIEngine.chooseMove(
       gameState.board,
       StateManager.getOpponentSymbol(),
-      gameState.difficulty
+      gameState.difficulty,
     );
 
     if (moveIndex === null) return;
@@ -612,7 +621,10 @@ const GameController = (() => {
       return;
     }
 
-    DOMManager.updateBoardForSymbol(moveIndex, StateManager.getOpponentSymbol());
+    DOMManager.updateBoardForSymbol(
+      moveIndex,
+      StateManager.getOpponentSymbol(),
+    );
     AudioManager.playMoveSound(StateManager.getOpponentSymbol());
 
     if (checkGameEnd(StateManager.getOpponentSymbol())) {
@@ -629,7 +641,7 @@ const GameController = (() => {
     if (GameLogic.checkWinner(gameState.board, lastMovedSymbol)) {
       StateManager.get().isActive = false;
       const winningCombo = GameLogic.WIN_COMBINATIONS.find((combo) =>
-        combo.every((index) => gameState.board[index] === lastMovedSymbol)
+        combo.every((index) => gameState.board[index] === lastMovedSymbol),
       );
       DOMManager.highlightWinningCells(winningCombo);
 
@@ -679,14 +691,18 @@ const GameController = (() => {
     if (!gameState.bestOf || gameState.neededWins <= 0) {
       return false;
     }
-    return gameState.scores.X >= gameState.neededWins || gameState.scores.O >= gameState.neededWins;
+    return (
+      gameState.scores.X >= gameState.neededWins ||
+      gameState.scores.O >= gameState.neededWins
+    );
   };
 
   const showRoundEndOptions = () => {
     gameState = StateManager.get();
     if (gameState.mode === "quick") {
       DOMManager.showModal();
-      DOMManager.get("modalTitle").textContent = DOMManager.get("resultDisplay").textContent;
+      DOMManager.get("modalTitle").textContent =
+        DOMManager.get("resultDisplay").textContent;
       DOMManager.get("modalSub").textContent = "Play again?";
     } else {
       DOMManager.get("nextRoundBtn").style.display = "inline-flex";
@@ -715,7 +731,12 @@ const GameController = (() => {
         title = "Match ended — It's a tie!";
       }
     } else {
-      title = X > O ? "X wins the match!" : O > X ? "O wins the match!" : "Match finished";
+      title =
+        X > O
+          ? "X wins the match!"
+          : O > X
+            ? "O wins the match!"
+            : "Match finished";
     }
 
     subtitle = `Final Score — X: ${X} · O: ${O} · Draws: ${draws}`;
@@ -728,22 +749,32 @@ const GameController = (() => {
   const updateGameDisplay = () => {
     gameState = StateManager.get();
     const currentPlayer = getPlayerName(gameState.currentSymbol);
-    DOMManager.get("turnDisplay").textContent = `${currentPlayer}'s Turn (${gameState.currentSymbol})`;
+    DOMManager.get("turnDisplay").textContent =
+      `${currentPlayer}'s Turn (${gameState.currentSymbol})`;
   };
 
   const updateScoreboard = () => {
     gameState = StateManager.get();
-    const nameX = gameState.p1Symbol === "X" ? gameState.p1Name : 
-                  gameState.opponent === "computer" ? "Computer" : gameState.p2Name;
-    const nameO = gameState.p1Symbol === "O" ? gameState.p1Name : 
-                  gameState.opponent === "computer" ? "Computer" : gameState.p2Name;
+    const nameX =
+      gameState.p1Symbol === "X"
+        ? gameState.p1Name
+        : gameState.opponent === "computer"
+          ? "Computer"
+          : gameState.p2Name;
+    const nameO =
+      gameState.p1Symbol === "O"
+        ? gameState.p1Name
+        : gameState.opponent === "computer"
+          ? "Computer"
+          : gameState.p2Name;
 
     DOMManager.get("xName").textContent = `X — ${nameX}`;
     DOMManager.get("oName").textContent = `O — ${nameO}`;
     DOMManager.get("xScore").textContent = gameState.scores.X;
     DOMManager.get("oScore").textContent = gameState.scores.O;
     DOMManager.get("drawScore").textContent = gameState.scores.draws;
-    DOMManager.get("roundMeta").textContent = `Round: ${gameState.scores.round}`;
+    DOMManager.get("roundMeta").textContent =
+      `Round: ${gameState.scores.round}`;
   };
 
   const startNewGame = () => {
@@ -803,7 +834,8 @@ const EventManager = (() => {
     opponent?.addEventListener("change", () => {
       const isHuman = opponent.value === "human";
       if (p2Field) p2Field.style.display = isHuman ? "block" : "none";
-      if (difficultyField) difficultyField.style.display = isHuman ? "none" : "block";
+      if (difficultyField)
+        difficultyField.style.display = isHuman ? "none" : "block";
     });
 
     // Demo button
@@ -812,8 +844,11 @@ const EventManager = (() => {
       const lastNames = ["Lex", "Timi", "Kai", "Joss", "Rio", "Rin"];
       const p1Input = DOMManager.get("p1Input");
       const p2Input = DOMManager.get("p2Input");
-      if (p1Input) p1Input.value = firstNames[Math.floor(Math.random() * firstNames.length)];
-      if (p2Input) p2Input.value = lastNames[Math.floor(Math.random() * lastNames.length)];
+      if (p1Input)
+        p1Input.value =
+          firstNames[Math.floor(Math.random() * firstNames.length)];
+      if (p2Input)
+        p2Input.value = lastNames[Math.floor(Math.random() * lastNames.length)];
     });
 
     // Audio toggles
@@ -824,7 +859,8 @@ const EventManager = (() => {
 
     DOMManager.get("musicToggle")?.addEventListener("click", () => {
       const musicOn = AudioManager.toggleMusic();
-      DOMManager.get("musicToggle").textContent = `Music: ${musicOn ? "On" : "Off"}`;
+      DOMManager.get("musicToggle").textContent =
+        `Music: ${musicOn ? "On" : "Off"}`;
     });
 
     DOMManager.get("muteAllBtn")?.addEventListener("click", () => {
@@ -850,7 +886,10 @@ const EventManager = (() => {
       DOMManager.showMenu();
     });
 
-    DOMManager.get("nextRoundBtn")?.addEventListener("click", GameController.startNewRound);
+    DOMManager.get("nextRoundBtn")?.addEventListener(
+      "click",
+      GameController.startNewRound,
+    );
 
     DOMManager.get("resetMatchBtn")?.addEventListener("click", () => {
       StateManager.resetScores();
@@ -921,9 +960,11 @@ const EventManager = (() => {
     DOMManager.showGame();
     GameController.startNewGame();
 
-    DOMManager.get("nextRoundBtn").style.display = gameMode === "quick" ? "none" : "inline-flex";
+    DOMManager.get("nextRoundBtn").style.display =
+      gameMode === "quick" ? "none" : "inline-flex";
     DOMManager.get("resetMatchBtn").style.display = "none";
-    DOMManager.get("endMatchBtn").style.display = gameMode === "quick" ? "none" : "inline-flex";
+    DOMManager.get("endMatchBtn").style.display =
+      gameMode === "quick" ? "none" : "inline-flex";
   };
 
   return {
@@ -947,7 +988,7 @@ document.addEventListener("DOMContentLoaded", () => {
     DOMManager.renderBoard(StateManager.get().board);
     GameController.updateGameDisplay();
     GameController.updateScoreboard();
-    
+
     // Check if localStorage is available and suggest feature
     if (PersistenceManager.isAvailable()) {
       console.log("💾 Storage available: Game state auto-saves");
@@ -968,7 +1009,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Show menu
     DOMManager.showMenu();
-    
+
     console.log("🎮 Tic Tac Toe initialized successfully");
   } catch (error) {
     console.error("❌ Initialization error:", error);
