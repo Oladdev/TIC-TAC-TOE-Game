@@ -1,25 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Play Neon Tic Tac Toe with computer AI or 2 players locally. Quick match or endless play modes."
+    />
     <title>Tic Tac Toe — Ola d dev</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" onerror="this.remove()" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" onerror="this.remove()" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" onerror="this.remove()" />
+    <!-- Fallback favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' font-weight='bold' fill='%2300ffff'>X</text></svg>" />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#0b0b0f" />
     <link rel="stylesheet" href="styles.css" />
     <script
       src="https://kit.fontawesome.com/8c87b7234d.js"
       crossorigin="anonymous"
+      defer
     ></script>
   </head>
   <body>
     <div class="glow-bg"><h1>Ola d dev</h1></div>
-    <div class="app">
+    <div class="app" role="main">
       <!-- ================= MENU ================= -->
-      <section class="menu" id="menu">
+      <section class="menu" id="menu" aria-label="Game setup menu">
         <div class="menu-left">
           <h1 class="brand">Tic Tac Toe</h1>
           <p class="subtitle">
@@ -36,14 +43,20 @@
           <div class="options" style="margin-bottom: 6px">
             <div class="field">
               <label for="gameMode">Mode</label>
-              <select id="gameMode">
+              <select
+                id="gameMode"
+                aria-label="Select game mode: Quick Match or Endless Play"
+              >
                 <option value="quick">Quick Match</option>
                 <option value="endless" selected>Endless Play</option>
               </select>
             </div>
             <div class="field">
               <label for="opponent">Opponent</label>
-              <select id="opponent">
+              <select
+                id="opponent"
+                aria-label="Select opponent type: Computer or Human"
+              >
                 <option value="computer" selected>Computer</option>
                 <option value="human">Friend (2 Players)</option>
               </select>
@@ -53,25 +66,35 @@
           <div class="options">
             <div class="field">
               <label for="p1">Player 1 Name</label>
-              <input id="p1" placeholder="Player 1" />
+              <input
+                id="p1"
+                placeholder="Player 1"
+                maxlength="20"
+                aria-label="Enter Player 1 name"
+              />
             </div>
             <div class="field" id="p2-field" style="display: none">
               <label for="p2">Player 2 Name</label>
-              <input id="p2" placeholder="Player 2" />
+              <input
+                id="p2"
+                placeholder="Player 2"
+                maxlength="20"
+                aria-label="Enter Player 2 name"
+              />
             </div>
           </div>
 
           <div class="options" style="margin-top: 6px">
             <div class="field">
               <label for="symbol">Play as</label>
-              <select id="symbol">
+              <select id="symbol" aria-label="Choose your symbol: X or O">
                 <option value="X" selected>X</option>
                 <option value="O">O</option>
               </select>
             </div>
             <div class="field" id="difficulty-field">
               <label for="difficulty">Difficulty (vs Computer)</label>
-              <select id="difficulty">
+              <select id="difficulty" aria-label="Select AI difficulty level">
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
                 <option value="hard" selected>Hard</option>
@@ -79,11 +102,14 @@
             </div>
           </div>
 
-          <!-- Added controls (best-of & sound) but styled to match Draft1 -->
           <div class="options" style="margin-top: 8px; align-items: center">
             <div class="field">
               <label for="bestOf">Best of (Endless)</label>
-              <select id="bestOf" class="small-select">
+              <select
+                id="bestOf"
+                class="small-select"
+                aria-label="Select match series length: Best of 1, 3, 5, or 7"
+              >
                 <option value="0">No (never auto-end)</option>
                 <option value="3" selected>Best of 3</option>
                 <option value="5">Best of 5</option>
@@ -96,17 +122,39 @@
             >
               <label style="margin-bottom: 6px">Sound & Music</label>
               <div class="small-row">
-                <button id="sfxToggle" class="btn btn-ghost">SFX: On</button>
-                <button id="musicToggle" class="btn btn-ghost">
-                  Music:Off
+                <button
+                  id="sfxToggle"
+                  class="btn btn-ghost"
+                  aria-label="Toggle sound effects"
+                >
+                  SFX: On
+                </button>
+                <button
+                  id="musicToggle"
+                  class="btn btn-ghost"
+                  aria-label="Toggle background music"
+                >
+                  Music: Off
                 </button>
               </div>
             </div>
           </div>
 
           <div class="big-actions">
-            <button class="btn btn-primary" id="startBtn">Start Game</button>
-            <button class="btn btn-ghost" id="demoBtn">Random Names</button>
+            <button
+              class="btn btn-primary"
+              id="startBtn"
+              aria-label="Start the game with selected settings"
+            >
+              Start Game
+            </button>
+            <button
+              class="btn btn-ghost"
+              id="demoBtn"
+              aria-label="Fill in random player names"
+            >
+              Random Names
+            </button>
           </div>
         </div>
 
@@ -114,19 +162,27 @@
           <div class="score" style="height: 100%">
             <h3>HOW IT WORKS</h3>
             <div class="line">
-              <span>Quick Match <i class="fa-solid fa-gamepad"></i></span
+              <span
+                >Quick Match
+                <i class="fa-solid fa-gamepad" aria-hidden="true"></i></span
               ><span class="badge">One & done</span>
             </div>
             <div class="line">
-              <span>Endless Play <i class="fa-solid fa-infinity"></i></span
+              <span
+                >Endless Play
+                <i class="fa-solid fa-infinity" aria-hidden="true"></i></span
               ><span class="badge">Keeps score</span>
             </div>
             <div class="line">
-              <span>Vs Computer <i class="fa-solid fa-robot"></i></span
+              <span
+                >Vs Computer
+                <i class="fa-solid fa-robot" aria-hidden="true"></i></span
               ><span class="badge">Play against an AI</span>
             </div>
             <div class="line">
-              <span>Vs Friend <i class="fa-solid fa-user"></i></span
+              <span
+                >Vs Friend
+                <i class="fa-solid fa-user" aria-hidden="true"></i></span
               ><span class="badge">Local 2 Player</span>
             </div>
             <p class="meta">
@@ -138,12 +194,22 @@
       </section>
 
       <!-- ================= GAME ================= -->
-      <section class="game" id="game">
+      <section class="game" id="game" aria-label="Active game area">
         <div class="board-wrap">
           <div class="hud">
-            <div class="turn" id="turn"></div>
+            <div
+              class="turn"
+              id="turn"
+              role="status"
+              aria-live="polite"
+              aria-label="Current turn information"
+            ></div>
             <div style="display: flex; gap: 8px">
-              <button class="btn btn-ghost" id="backBtn">
+              <button
+                class="btn btn-ghost"
+                id="backBtn"
+                aria-label="Return to menu and change settings"
+              >
                 Change Settings
               </button>
               <button
@@ -151,24 +217,37 @@
                 id="nextRoundBtn"
                 title="Start next round"
                 style="display: none"
+                aria-label="Start the next round"
               >
                 Next Round
               </button>
               <button
                 class="btn btn-ghost"
                 id="resetMatchBtn"
-                title="Reset match"
+                title="Reset match scores"
                 style="display: none"
+                aria-label="Reset match scores and start over"
               >
                 Reset Match
               </button>
             </div>
           </div>
-          <div class="board" id="board"></div>
-          <div class="result" id="result"></div>
+          <div
+            class="board"
+            id="board"
+            role="grid"
+            aria-label="Tic Tac Toe game board"
+          ></div>
+          <div
+            class="result"
+            id="result"
+            role="status"
+            aria-live="polite"
+            aria-label="Game result"
+          ></div>
         </div>
 
-        <aside class="score" id="scorePanel">
+        <aside class="score" id="scorePanel" aria-label="Game scoreboard">
           <h3>Scoreboard</h3>
           <div class="line">
             <span id="xName">X</span><span class="badge x" id="xScore">0</span>
@@ -186,38 +265,228 @@
               id="endMatchBtn"
               class="btn btn-primary"
               style="display: none"
+              aria-label="End the current match"
             >
               End Match
             </button>
-            <button id="muteAllBtn" class="btn btn-ghost">Mute</button>
+            <button
+              id="muteAllBtn"
+              class="btn btn-ghost"
+              aria-label="Mute all sounds and music"
+            >
+              Mute
+            </button>
           </div>
         </aside>
       </section>
 
       <!-- Quick Match Finished Modal -->
-      <div class="overlay" id="overlay">
+      <div
+        class="overlay"
+        id="overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
         <div class="modal">
           <h2 id="modalTitle">Match Over</h2>
           <p id="modalSub">Nice one! Want to go again?</p>
           <div style="display: flex; gap: 8px; justify-content: center">
-            <button class="btn btn-primary" id="playAgainBtn">
+            <button
+              class="btn btn-primary"
+              id="playAgainBtn"
+              aria-label="Play another match with same settings"
+            >
               Play Again
             </button>
-            <button class="btn btn-ghost" id="toMenuBtn">Back to Menu</button>
+            <button
+              class="btn btn-ghost"
+              id="toMenuBtn"
+              aria-label="Return to main menu"
+            >
+              Back to Menu
+            </button>
           </div>
         </div>
       </div>
     </div>
-    <script src="script.js"></script>
-    <script>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("service-worker.js")
-          .then(() => console.log("Service Worker Registered"))
-          .catch((err) =>
-            console.log("Service Worker registration failed:", err)
-          );
-      }
-    </script>
+    <script src="script.js" defer></script>
   </body>
 </html>
+  <!-- ================= MENU ================= -->
+  <section class="menu" id="menu">
+    <div class="menu-left">
+      <h1 class="byyrand">Tic Tac Toe</h1>
+      <p class="subtitle">
+        Quick Match or Endless Play — pick your rival and game on
+      </p>
+
+      <div class="mode-row" style="margin-bottom: 12px">
+        <span class="chip">Game Mode</span>
+        <label class="hint"
+          >Choose either <strong>Quick Match</strong> (single game) or
+          <strong>Endless</strong> (keeps score).</label
+        >
+      </div>
+      <div class="options" style="margin-bottom: 6px">
+        <div class="field">
+          <label for="gameMode">Mode</label>
+          <select id="gameMode">
+            <option value="quick">Quick Match</option>
+            <option value="endless" selected>Endless Play</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="opponent">Opponent</label>
+          <select id="opponent">
+            <option value="computer" selected>Computer</option>
+            <option value="human">Friend (2 Players)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="options">
+        <div class="field">
+          <label for="p1">Player 1 Name</label>
+          <input id="p1" placeholder="Player 1" />
+        </div>
+        <div class="field" id="p2-field" style="display: none">
+          <label for="p2">Player 2 Name</label>
+          <input id="p2" placeholder="Player 2" />
+        </div>
+      </div>
+
+      <div class="options" style="margin-top: 6px">
+        <div class="field">
+          <label for="symbol">Play as</label>
+          <select id="symbol">
+            <option value="X" selected>X</option>
+            <option value="O">O</option>
+          </select>
+        </div>
+        <div class="field" id="difficulty-field">
+          <label for="difficulty">Difficulty (vs Computer)</label>
+          <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard" selected>Hard</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Added controls (best-of & sound) but styled to match Draft1 -->
+      <div class="options" style="margin-top: 8px; align-items: center">
+        <div class="field">
+          <label for="bestOf">Best of (Endless)</label>
+          <select id="bestOf" class="small-select">
+            <option value="0">No (never auto-end)</option>
+            <option value="3" selected>Best of 3</option>
+            <option value="5">Best of 5</option>
+            <option value="7">Best of 7</option>
+          </select>
+        </div>
+        <div class="field" style="display: flex; gap: 8px; align-items: center">
+          <label style="margin-bottom: 6px">Sound & Music</label>
+          <div class="small-row">
+            <button id="sfxToggle" class="btn btn-ghost">SFX: On</button>
+            <button id="musicToggle" class="btn btn-ghost">Music:Off</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="big-actions">
+        <button class="btn btn-primary" id="startBtn">Start Game</button>
+        <button class="btn btn-ghost" id="demoBtn">Random Names</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="score" style="height: 100%">
+        <h3>HOW IT WORKS</h3>
+        <div class="line">
+          <span>Quick Match <i class="fa-solid fa-gamepad"></i></span
+          ><span class="badge">One & done</span>
+        </div>
+        <div class="line">
+          <span>Endless Play <i class="fa-solid fa-infinity"></i></span
+          ><span class="badge">Keeps score</span>
+        </div>
+        <div class="line">
+          <span>Vs Computer <i class="fa-solid fa-robot"></i></span
+          ><span class="badge">Play against an AI</span>
+        </div>
+        <div class="line">
+          <span>Vs Friend <i class="fa-solid fa-user"></i></span
+          ><span class="badge">Local 2 Player</span>
+        </div>
+        <p class="meta">
+          Tip: If you play as <strong>O</strong> vs Computer, the AI starts as
+          X.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section class="game" id="game">
+    <div class="board-wrap">
+      <div class="hud">
+        <div class="turn" id="turn"></div>
+        <div style="display: flex; gap: 8px">
+          <button class="btn btn-ghost" id="backBtn">Change Settings</button>
+          <button
+            class="btn btn-ghost"
+            id="nextRoundBtn"
+            title="Start next round"
+            style="display: none"
+          >
+            Next Round
+          </button>
+          <button
+            class="btn btn-ghost"
+            id="resetMatchBtn"
+            title="Reset match"
+            style="display: none"
+          >
+            Reset Match
+          </button>
+        </div>
+      </div>
+      <div class="board" id="board"></div>
+      <div class="result" id="result"></div>
+    </div>
+
+    <aside class="score" id="scorePanel">
+      <h3>Scoreboard</h3>
+      <div class="line">
+        <span id="xName">X</span><span class="badge x" id="xScore">0</span>
+      </div>
+      <div class="line">
+        <span id="oName">O</span><span class="badge o" id="oScore">0</span>
+      </div>
+      <div class="line">
+        <span>Draws</span><span class="badge" id="dScore">0</span>
+      </div>
+      <div class="meta"><span id="roundMeta">Round: 1</span></div>
+
+      <div class="controls">
+        <button id="endMatchBtn" class="btn btn-primary" style="display: none">
+          End Match
+        </button>
+        <button id="muteAllBtn" class="btn btn-ghost">Mute</button>
+      </div>
+    </aside>
+  </section>
+
+  <!-- Quick Match Finished Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h2 id="modalTitle">Match Over</h2>
+      <p id="modalSub">Nice one! Want to go again?</p>
+      <div style="display: flex; gap: 8px; justify-content: center">
+        <button class="btn btn-primary" id="playAgainBtn">Play Again</button>
+        <button class="btn btn-ghost" id="toMenuBtn">Back to Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
