@@ -367,55 +367,58 @@ const AIEngine = (() => {
 // DOM MANAGER MODULE
 // ============================================================================
 const DOMManager = (() => {
-  const elements = {
-    menu: document.getElementById("menu"),
-    game: document.getElementById("game"),
-    board: document.getElementById("board"),
-    turnDisplay: document.getElementById("turn"),
-    resultDisplay: document.getElementById("result"),
-    overlay: document.getElementById("overlay"),
+  const elements =
+    typeof document !== "undefined"
+      ? {
+          menu: document.getElementById("menu"),
+          game: document.getElementById("game"),
+          board: document.getElementById("board"),
+          turnDisplay: document.getElementById("turn"),
+          resultDisplay: document.getElementById("result"),
+          overlay: document.getElementById("overlay"),
 
-    // Menu inputs
-    gameMode: document.getElementById("gameMode"),
-    opponent: document.getElementById("opponent"),
-    difficulty: document.getElementById("difficulty"),
-    symbol: document.getElementById("symbol"),
-    bestOf: document.getElementById("bestOf"),
-    p1Input: document.getElementById("p1"),
-    p2Input: document.getElementById("p2"),
-    p2Field: document.getElementById("p2-field"),
-    difficultyField: document.getElementById("difficulty-field"),
+          // Menu inputs
+          gameMode: document.getElementById("gameMode"),
+          opponent: document.getElementById("opponent"),
+          difficulty: document.getElementById("difficulty"),
+          symbol: document.getElementById("symbol"),
+          bestOf: document.getElementById("bestOf"),
+          p1Input: document.getElementById("p1"),
+          p2Input: document.getElementById("p2"),
+          p2Field: document.getElementById("p2-field"),
+          difficultyField: document.getElementById("difficulty-field"),
 
-    // Menu buttons
-    startBtn: document.getElementById("startBtn"),
-    demoBtn: document.getElementById("demoBtn"),
+          // Menu buttons
+          startBtn: document.getElementById("startBtn"),
+          demoBtn: document.getElementById("demoBtn"),
 
-    // Game buttons
-    backBtn: document.getElementById("backBtn"),
-    nextRoundBtn: document.getElementById("nextRoundBtn"),
-    resetMatchBtn: document.getElementById("resetMatchBtn"),
-    endMatchBtn: document.getElementById("endMatchBtn"),
+          // Game buttons
+          backBtn: document.getElementById("backBtn"),
+          nextRoundBtn: document.getElementById("nextRoundBtn"),
+          resetMatchBtn: document.getElementById("resetMatchBtn"),
+          endMatchBtn: document.getElementById("endMatchBtn"),
 
-    // Scoreboard
-    scorePanel: document.getElementById("scorePanel"),
-    xName: document.getElementById("xName"),
-    oName: document.getElementById("oName"),
-    xScore: document.getElementById("xScore"),
-    oScore: document.getElementById("oScore"),
-    drawScore: document.getElementById("dScore"),
-    roundMeta: document.getElementById("roundMeta"),
+          // Scoreboard
+          scorePanel: document.getElementById("scorePanel"),
+          xName: document.getElementById("xName"),
+          oName: document.getElementById("oName"),
+          xScore: document.getElementById("xScore"),
+          oScore: document.getElementById("oScore"),
+          drawScore: document.getElementById("dScore"),
+          roundMeta: document.getElementById("roundMeta"),
 
-    // Audio toggles
-    sfxToggle: document.getElementById("sfxToggle"),
-    musicToggle: document.getElementById("musicToggle"),
-    muteAllBtn: document.getElementById("muteAllBtn"),
+          // Audio toggles
+          sfxToggle: document.getElementById("sfxToggle"),
+          musicToggle: document.getElementById("musicToggle"),
+          muteAllBtn: document.getElementById("muteAllBtn"),
 
-    // Modal
-    modalTitle: document.getElementById("modalTitle"),
-    modalSub: document.getElementById("modalSub"),
-    playAgainBtn: document.getElementById("playAgainBtn"),
-    toMenuBtn: document.getElementById("toMenuBtn"),
-  };
+          // Modal
+          modalTitle: document.getElementById("modalTitle"),
+          modalSub: document.getElementById("modalSub"),
+          playAgainBtn: document.getElementById("playAgainBtn"),
+          toMenuBtn: document.getElementById("toMenuBtn"),
+        }
+      : {};
 
   const validateElements = () => {
     const missingElements = Object.entries(elements)
@@ -431,23 +434,28 @@ const DOMManager = (() => {
     get: (key) => elements[key],
     getAll: () => elements,
     showMenu: () => {
+      if (!elements.menu || !elements.game || !elements.overlay) return;
       elements.menu.style.display = "grid";
       elements.game.style.display = "none";
       elements.overlay.style.display = "none";
     },
     showGame: () => {
+      if (!elements.menu || !elements.game || !elements.overlay) return;
       elements.menu.style.display = "none";
       elements.game.style.display = "grid";
       elements.overlay.style.display = "none";
     },
     showModal: () => {
+      if (!elements.overlay) return;
       elements.overlay.style.display = "flex";
     },
     hideModal: () => {
+      if (!elements.overlay) return;
       elements.overlay.style.display = "none";
     },
     renderBoard: (board) => {
       const boardEl = elements.board;
+      if (!boardEl) return; // Skip if DOM not available (e.g., in Jest)
       boardEl.innerHTML = "";
       board.forEach((symbol, index) => {
         const cell = document.createElement("div");
@@ -460,17 +468,20 @@ const DOMManager = (() => {
       });
     },
     highlightWinningCells: (winningIndices) => {
+      if (!elements.board) return;
       winningIndices.forEach((index) => {
         const cell = elements.board.querySelector(`[data-index="${index}"]`);
         if (cell) cell.classList.add("win");
       });
     },
     clearBoardHighlight: () => {
+      if (!elements.board) return;
       elements.board.querySelectorAll(".win").forEach((cell) => {
         cell.classList.remove("win");
       });
     },
     updateBoardForSymbol: (index, symbol) => {
+      if (!elements.board) return;
       const cell = elements.board.querySelector(`[data-index="${index}"]`);
       if (cell) {
         cell.textContent = symbol;
@@ -874,7 +885,10 @@ const EventManager = (() => {
   };
 
   const initGameEvents = () => {
-    DOMManager.get("board")?.addEventListener("click", (event) => {
+    const board = DOMManager.get("board");
+    if (!board) return; // Skip if DOM not available
+
+    board.addEventListener("click", (event) => {
       const cell = event.target.closest(".cell");
       if (cell) {
         const index = parseInt(cell.dataset.index, 10);
@@ -980,39 +994,57 @@ const EventManager = (() => {
 // ============================================================================
 // INITIALIZATION
 // ============================================================================
-document.addEventListener("DOMContentLoaded", () => {
-  try {
-    // Initialize core systems
-    AudioManager.initialize();
-    EventManager.initialize();
-    DOMManager.renderBoard(StateManager.get().board);
-    GameController.updateGameDisplay();
-    GameController.updateScoreboard();
+if (typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    try {
+      // Initialize core systems
+      AudioManager.initialize();
+      EventManager.initialize();
+      DOMManager.renderBoard(StateManager.get().board);
+      GameController.updateGameDisplay();
+      GameController.updateScoreboard();
 
-    // Check if localStorage is available and suggest feature
-    if (PersistenceManager.isAvailable()) {
-      console.log("💾 Storage available: Game state auto-saves");
+      // Check if localStorage is available and suggest feature
+      if (PersistenceManager.isAvailable()) {
+        console.log("💾 Storage available: Game state auto-saves");
+      }
+
+      // Register service worker with better error handling
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .then((registration) => {
+            console.log("✅ Service Worker registered:", registration.scope);
+          })
+          .catch((error) => {
+            console.warn(
+              "⚠️ Service Worker registration failed:",
+              error.message,
+            );
+            // App still works without service worker
+          });
+      }
+
+      // Show menu
+      DOMManager.showMenu();
+
+      console.log("🎮 Tic Tac Toe initialized successfully");
+    } catch (error) {
+      console.error("❌ Initialization error:", error);
+      alert("Failed to initialize game. Please refresh the page.");
     }
+  });
+}
 
-    // Register service worker with better error handling
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("service-worker.js")
-        .then((registration) => {
-          console.log("✅ Service Worker registered:", registration.scope);
-        })
-        .catch((error) => {
-          console.warn("⚠️ Service Worker registration failed:", error.message);
-          // App still works without service worker
-        });
-    }
-
-    // Show menu
-    DOMManager.showMenu();
-
-    console.log("🎮 Tic Tac Toe initialized successfully");
-  } catch (error) {
-    console.error("❌ Initialization error:", error);
-    alert("Failed to initialize game. Please refresh the page.");
-  }
-});
+// ============================================================================
+// EXPORTS FOR TESTING (Jest/Node.js)
+// ============================================================================
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    GameLogic,
+    AIEngine,
+    StateManager,
+    PersistenceManager,
+    AudioManager,
+  };
+}
